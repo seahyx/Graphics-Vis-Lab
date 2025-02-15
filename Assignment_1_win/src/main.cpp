@@ -93,41 +93,131 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 /******************************************************************************/
 
 
-// TODO: insert your code in this function for Mesh Loading
+// Mesh Loading
 //       1) store vertices and normals in verList with order (v.x, v.y, v.z, n.x, n.y, n.z)
-//       2) store vertex indices of each triangle in triList 
+//       2) store vertex indices of each triangle in triList
 int LoadInput(vector<float> &verList, vector<unsigned> &triList)
 {
-    // Note: these two lines of code is to avoid runtime error; 
-    //       please remove them after you fill your own code for 3D model loading
-    verList.push_back(0); 
-    triList.push_back(0);
+    // Data location
+    string dataPath = "data/mickey.obj";
+
+    // Check obj file
+    ifstream file(dataPath);
+    if (!file.is_open())
+    {
+        cout << "Error: cannot open file" << endl;
+        return -1;
+    }
+
+    // Read obj file
+    vector<glm::vec3> vertices;
+    vector<glm::vec3> normals;
+    vector<unsigned int> indices;
+    string line;
+    // iterate through each line in the file
+    while (getline (file, line))
+    {
+        // iterate through each value in a line
+        istringstream iss(line);
+
+        // First check line type
+        string type;
+        iss >> type;
+        if (type == "v")
+        {
+            glm::vec3 vertex;
+            iss >> vertex.x >> vertex.y >> vertex.z;
+            vertices.push_back(vertex);
+        }
+        else if (type == "vn")
+        {
+            glm::vec3 normal;
+            iss >> normal.x >> normal.y >> normal.z;
+            normals.push_back(normal);
+        }
+        else if (type == "f")
+        {
+            // For faces we need a separate line stream to separate the '/'
+            for (int i = 0; i < 3; i++)
+            {
+                string face_vertex;
+                iss >> face_vertex; // will produce $v_i/$v_t/$v_n, which needs to be separated
+                istringstream face_vertex_stream(face_vertex);
+                getline(face_vertex_stream, face_vertex, '/');
+                indices.push_back(stoi(face_vertex) - 1); // index of obj starts from 1
+                getline(face_vertex_stream, face_vertex, '/');
+                indices.push_back(stoi(face_vertex)); // who cares lol (texture coordinates)
+                getline(face_vertex_stream, face_vertex, '/');
+                indices.push_back(stoi(face_vertex) - 1); // index of obj starts from 1
+            }
+        }
+    }
+
+    // For debug, print sizes of vertices and face set
+    cout << "Total Vertex Count: " << vertices.size() << endl;
+    cout << "Total Normal Count: " << normals.size() << endl;
+    cout << "Total Face Count: " << indices.size() / 9 << endl;
+
+    // Store vertices and normals and faces
+    // 
+    // First resize the verList vector to fit all the vertices and normals
+    // 
+    // Since the list of vertices and normals don't correspond to each other,
+    // we will fill the normals in as we iterate through the face set
+    // and to do that, we first resize the verList to be able to fit everything
+    verList.resize(vertices.size() * 3 * 2); // v.x, v.y, v.z, vn.x, vn.y, vn.z (6 total values for each vertex + normal)
+    // Iterate through face set
+    for (int i = 0; i < indices.size() / 9; i++) // 3 * 3 = 9 values total in a face set
+    {
+        for (int k = 0; k < 3; k++) {
+            int offset = i * 9 + k * 3;
+            glm::vec3 vertex = vertices[indices[offset]]; // first value is the vertex index
+            glm::vec3 normal = normals[indices[offset + 2]]; // last value is the normal index
+            triList.push_back(indices[offset]); // push the vertex index, of course
+            
+            int verList_offset = indices[offset] * 6;
+            verList[verList_offset + 0] = vertex.x;
+            verList[verList_offset + 1] = vertex.y;
+            verList[verList_offset + 2] = vertex.z;
+            verList[verList_offset + 3] = normal.x;
+            verList[verList_offset + 4] = normal.y;
+            verList[verList_offset + 5] = normal.z;
+        }
+    }
 
     return 0;
 }
 
-// TODO: insert your code in this function for Mesh Coloring
+// Mesh Coloring
 void SetMeshColor(int &colorID)
 {
-   
+    colorID = (colorID + 1) % colorTable->length();
 }
 
-// TODO: insert your code in this function for Mesh Transformation (Rotation)
+// Mesh Transformation (Rotation)
 void RotateModel(float angle, glm::vec3 axis)
 {
-    
+    float c = cos(-angle), s = sin(-angle), c1 = 1 - c;
+    float x = axis.x, y = axis.y, z = axis.z;
+    glm::mat4 rotMat = glm::mat4(
+        x*x*c1 + c, x*y*c1 - z*s, x*z*c1 + y*s, 0,
+        y*x*c1 + z*s, y*y*c1 + c, y*z*c1 - x*s, 0,
+        x*z*c1 - y*s, y*z*c1 + x*s, z*z*c1 + c, 0,
+        0,0,0,1.0f
+    );
+    modelMatrix *= rotMat;
 }
 
-// TODO: insert your code in this function for Mesh Transformation (Translation)
+// Mesh Transformation (Translation)
 void TranslateModel(glm::vec3 transVec)
 {
-
+    modelMatrix = glm::translate(modelMatrix, transVec);
 }
 
-// TODO: insert your code in this function for Mesh Transformation (Scaling)
+// Mesh Transformation (Scaling)
 void ScaleModel(float scale)
 {
-    
+    modelMatrix = glm::scale(modelMatrix, glm::vec3(scale));
 }
 
 
@@ -173,13 +263,13 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
-	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
     {
         leftMouseButtonHold = true;
     }
     else
     {
-    	leftMouseButtonHold = false;
+        leftMouseButtonHold = false;
     }
 }
 
@@ -188,21 +278,21 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 // -------------------------------------------------------
 void cursor_pos_callback(GLFWwindow* window, double mouseX, double mouseY)
 {
-	float  dx, dy;
-	float  nx, ny, scale, angle;
+    float  dx, dy;
+    float  nx, ny, scale, angle;
     
 
-	if ( leftMouseButtonHold )
-	{
-		if (isFirstMouse)
-	    {
-	        prevMouseX = mouseX;
-	        prevMouseY = mouseY;
-	        isFirstMouse = false;
-	    }
+    if ( leftMouseButtonHold )
+    {
+        if (isFirstMouse)
+        {
+            prevMouseX = mouseX;
+            prevMouseY = mouseY;
+            isFirstMouse = false;
+        }
 
-	    else
-	    {
+        else
+        {
             if( glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS )
             {
                 float dx =         _TRANS_FACTOR * (mouseX - prevMouseX);
@@ -234,13 +324,13 @@ void cursor_pos_callback(GLFWwindow* window, double mouseX, double mouseY)
 
                 RotateModel( angle, glm::vec3(nx, ny, 0.0f) );
             }
-	    }  
-	}  
+        }  
+    }  
 
-	else
-	{
-		isFirstMouse = true;
-	}
+    else
+    {
+        isFirstMouse = true;
+    }
 }
 
 
@@ -248,9 +338,9 @@ void cursor_pos_callback(GLFWwindow* window, double mouseX, double mouseY)
 // ----------------------------------------------------------------------
 void scroll_callback(GLFWwindow* window, double xOffset, double yOffset)
 {
-	float scale = 1.0f + _SCALE_FACTOR * yOffset;
+    float scale = 1.0f + _SCALE_FACTOR * yOffset;
 
-	ScaleModel( scale ); 
+    ScaleModel( scale ); 
 }
 
 
