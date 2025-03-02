@@ -15,7 +15,7 @@
 ///=========================================================================================///
 
 
-// TODO: Load the skeleton from file here, create hierarchy of joints
+// Load the skeleton from file here, create hierarchy of joints
 //       (i.e., set values for m_rootJoint and m_joints)
 void SkeletalModel::loadSkeleton( const char* filename )
 {
@@ -68,7 +68,7 @@ void SkeletalModel::computeJointTransforms( )
     computeJointTransforms(m_rootJoint, m_matrixStack);
 }
 
-// TODO: You will need to implement this recursive helper function to traverse the joint hierarchy for computing transformations of the joints
+// Recursive helper function to traverse the joint hierarchy for computing transformations of the joints
 void SkeletalModel::computeJointTransforms(Joint* joint, MatrixStack matrixStack)
 {
     matrixStack.push(joint->transform);
@@ -93,7 +93,7 @@ void SkeletalModel::computeBoneTransforms( )
     computeBoneTransforms(m_rootJoint, m_matrixStack);
 }
 
-// TODO: You will need to implement this recursive helper function to traverse the joint hierarchy for computing transformations of the bones
+// Recursive helper function to traverse the joint hierarchy for computing transformations of the bones
 void SkeletalModel::computeBoneTransforms(Joint* joint, MatrixStack matrixStack)
 {
     matrixStack.push(joint->transform);
@@ -136,9 +136,13 @@ void SkeletalModel::computeBoneTransforms(Joint* joint, MatrixStack matrixStack)
 ///                              Set Joint Angles for Transform     
 ///=========================================================================================///
 
-// TODO: Set the rotation part of the joint's transformation matrix based on the passed in Euler angles.
+// Set the rotation part of the joint's transformation matrix based on the passed in Euler angles.
 void SkeletalModel::setJointTransform(int jointIndex, float angleX, float angleY, float angleZ)
 {
+    // Convert from degrees to radians
+    angleX *= M_PI / 180.0f;
+    angleY *= M_PI / 180.0f;
+    angleZ *= M_PI / 180.0f;
     glm::mat4 rotX = glm::rotate(glm::mat4(1.0f), angleX, glm::vec3(1.0f, 0, 0));
     glm::mat4 rotY = glm::rotate(glm::mat4(1.0f), angleY, glm::vec3(0, 1.0f, 0));
     glm::mat4 rotZ = glm::rotate(glm::mat4(1.0f), angleZ, glm::vec3(1, 0, 1.0f));
