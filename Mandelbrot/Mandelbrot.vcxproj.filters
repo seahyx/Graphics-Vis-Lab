@@ -21,20 +21,23 @@
     <ClCompile Include="src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="shader.cpp">
+    <ClCompile Include="src\shader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="shader.vert">
+    <None Include="src\shader.frag">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="shader.frag">
+    <None Include="src\shader.vert">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="shader.h">
+    <ClInclude Include="src\shader.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\main.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

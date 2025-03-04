@@ -1,44 +1,4 @@
-#include <iostream>
-#include <stdlib.h>
-#include <string>
-
-#include <glad\glad.h>
-#include <GLFW\glfw3.h>
-#include <GLM\glm.hpp>
-#include <GLM\gtc\matrix_transform.hpp>
-#include <GLM\gtc\type_ptr.hpp>
-
-
-int screen_width{ 1080 };
-int screen_height{ 1080 };
-
-int num_frames{ 0 };
-float last_time{ 0.0f };
-
-float vertices[] =
-{
-	//    x      y      z   
-		-1.0f, -1.0f, -0.0f,
-		 1.0f,  1.0f, -0.0f,
-		-1.0f,  1.0f, -0.0f,
-		 1.0f, -1.0f, -0.0f
-};
-
-unsigned int indices[] =
-{
-	//  2---,1
-	//  | .' |
-	//  0'---3
-		0, 1, 2,
-		0, 3, 1
-};
-
-/* Window resize callback function prototype */
-void framebufferSizeCallback(GLFWwindow* window, int width, int height);
-/* Window input event callback function prototype */
-void processInput(GLFWwindow* window);
-/* FPS counter function prototype */
-void countFPS();
+#include "main.h"
 
 int main()
 {
@@ -60,7 +20,7 @@ int main()
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	/* Create window object */
-	GLFWwindow* window = glfwCreateWindow(800, 600, "Ying Xiang's Mandelbrot Viewer", NULL, NULL);
+	GLFWwindow* window = glfwCreateWindow(screen_width, screen_height, "Ying Xiang's Mandelbrot Viewer", NULL, NULL);
 	if (window == NULL)
 	{
 		std::cout << "Failed to create GLFW window" << std::endl;
@@ -81,15 +41,15 @@ int main()
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
 		std::cout << "Failed to initialize GLAD" << std::endl;
+		glfwTerminate();
 		return -1;
 	}
 
 	/* Create Viewport */
-	glViewport(0, 0, 800, 600);
+	glViewport(0, 0, screen_width, screen_height);
 	/* Register Callbacks */
 	glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 	
-	last_time = glfwGetTime(); // Initialize last_time for FPS counting
 
 	
 	// Setup vertex data and buffers and configure vertex attributes
@@ -114,10 +74,17 @@ int main()
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 
+	// Initialize shader
+	Shader our_shader("src/shader.vert", "src/shader.frag");
 
-	///////////////////////////
-	//// START RENDER LOOP ////
-	///////////////////////////
+	// Initialize last_time for FPS counting
+	last_time = glfwGetTime();
+
+	glEnable(GL_DEPTH_TEST);
+
+	//============================================//
+	//             START RENDER LOOP
+	//============================================//
 	while (!glfwWindowShouldClose(window))
 	{
 		// Process key inputs
@@ -128,8 +95,12 @@ int main()
 		// Core rendering commands
 		// Clear buffer with specified background color
 		glClearColor(.2f, .3f, .3f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		our_shader.use_shader();
+		our_shader.set_float("zoom", zoom);
+		our_shader.set_float("center_x", center_x);
+		our_shader.set_float("center_y", center_y);
 
 		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -138,9 +109,9 @@ int main()
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
-	///////////////////////////
-	////  END RENDER LOOP  ////
-	///////////////////////////
+	//============================================//
+	//              END RENDER LOOP
+	//============================================//
 
 	/* Cleanup */
 	glDeleteVertexArrays(1, &VAO);
@@ -161,6 +132,60 @@ void processInput(GLFWwindow* window)
 {
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
+
+	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+	{
+		center_y = center_y + 0.005f * zoom;
+		if (center_y > 1.0f)
+		{
+			center_y = 1.0f;
+		}
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+	{
+		center_y = center_y - 0.005f * zoom;
+		if (center_y < -1.0f)
+		{
+			center_y = -1.0f;
+		}
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+	{
+		center_x = center_x - 0.005f * zoom;
+		if (center_x < -1.0f)
+		{
+			center_x = -1.0f;
+		}
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+	{
+		center_x = center_x + 0.005f * zoom;
+		if (center_x > 1.0f)
+		{
+			center_x = 1.0f;
+		}
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+	{
+		zoom = zoom * 1.02f;
+		if (zoom > 1.0f)
+		{
+			zoom = 1.0f;
+		}
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+	{
+		zoom = zoom * 0.98f;
+		if (zoom < 0.000001f)
+		{
+			zoom = 0.000001f;
+		}
+	}
 }
 
 void countFPS()
