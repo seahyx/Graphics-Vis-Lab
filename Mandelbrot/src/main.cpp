@@ -101,6 +101,7 @@ int main()
 		our_shader.set_float("zoom", zoom);
 		our_shader.set_float("center_x", center_x);
 		our_shader.set_float("center_y", center_y);
+		our_shader.set_vec2("window", glm::vec2(screen_width, screen_height));
 
 		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -125,6 +126,8 @@ int main()
 
 void framebufferSizeCallback(GLFWwindow* window, int width, int height)
 {
+	screen_width = width;
+	screen_height = height;
 	glViewport(0, 0, width, height);
 }
 

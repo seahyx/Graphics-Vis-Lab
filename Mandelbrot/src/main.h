@@ -3,6 +3,9 @@
 #include <iostream>
 #include <stdlib.h>
 #include <string>
+#include <math.h>
+#include <algorithm>
+#include <vector>
 
 #include <glad\glad.h>
 #include <GLFW\glfw3.h>

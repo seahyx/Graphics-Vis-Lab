@@ -19,6 +19,7 @@ public:
     void use_shader();
 
     void set_float(const std::string& name, float value) const;
+    void set_vec2(const std::string& name, glm::vec2 vec) const;
     void set_vec4(const std::string& name, glm::vec4 vec) const;
 
 private:
