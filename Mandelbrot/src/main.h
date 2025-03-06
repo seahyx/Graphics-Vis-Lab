@@ -19,11 +19,15 @@ int screen_width{ 1080 };
 int screen_height{ 1080 };
 
 int num_frames{ 0 };
-double last_time{ 0.0f };
+double last_time{ 0.0 };
+double last_frame_time{ 0.0 };
+double delta_time{ 0.0 };
 
 float center_x{ 0.0f };
 float center_y{ 0.0f };
+float move_speed{ 5.0f };
 double zoom{ 1.0 };
+float zoom_speed{ 2.0f };
 
 float vertices[] =
 {
@@ -49,3 +53,5 @@ void framebufferSizeCallback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 /* FPS counter function prototype */
 void countFPS();
+/* Delta time updater function prototype */
+void updateDeltaTime();

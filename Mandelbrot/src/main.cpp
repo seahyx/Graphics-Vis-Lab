@@ -79,6 +79,7 @@ int main()
 
 	// Initialize last_time for FPS counting
 	last_time = glfwGetTime();
+	updateDeltaTime();
 
 	glEnable(GL_DEPTH_TEST);
 
@@ -91,6 +92,7 @@ int main()
 		processInput(window);
 
 		countFPS();
+		updateDeltaTime();
 
 		// Core rendering commands
 		// Clear buffer with specified background color
@@ -138,7 +140,7 @@ void processInput(GLFWwindow* window)
 
 	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
 	{
-		center_y = center_y + 0.005f * zoom;
+		center_y = center_y + move_speed * 0.1f * zoom * delta_time;
 		if (center_y > 1.0f)
 		{
 			center_y = 1.0f;
@@ -147,7 +149,7 @@ void processInput(GLFWwindow* window)
 
 	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
 	{
-		center_y = center_y - 0.005f * zoom;
+		center_y = center_y - move_speed * 0.1f * zoom * delta_time;
 		if (center_y < -1.0f)
 		{
 			center_y = -1.0f;
@@ -156,7 +158,7 @@ void processInput(GLFWwindow* window)
 
 	if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
 	{
-		center_x = center_x - 0.005f * zoom;
+		center_x = center_x - move_speed * 0.1f * zoom * delta_time;
 		if (center_x < -1.0f)
 		{
 			center_x = -1.0f;
@@ -165,7 +167,7 @@ void processInput(GLFWwindow* window)
 
 	if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
 	{
-		center_x = center_x + 0.005f * zoom;
+		center_x = center_x + move_speed * 0.1f * zoom * delta_time;
 		if (center_x > 1.0f)
 		{
 			center_x = 1.0f;
@@ -174,7 +176,7 @@ void processInput(GLFWwindow* window)
 
 	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
 	{
-		zoom = zoom * 1.02f;
+		zoom = zoom * (1.0f + zoom_speed * delta_time);
 		if (zoom > 1.0f)
 		{
 			zoom = 1.0f;
@@ -183,7 +185,7 @@ void processInput(GLFWwindow* window)
 
 	if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
 	{
-		zoom = zoom * 0.98f;
+		zoom = zoom * (1.0f - zoom_speed * delta_time);
 		if (zoom < 0.000001f)
 		{
 			zoom = 0.000001f;
@@ -201,4 +203,11 @@ void countFPS()
 		num_frames = 0;
 		last_time += 1.0f;
 	}
+}
+
+void updateDeltaTime()
+{
+	double current_time = glfwGetTime();
+	delta_time = current_time - last_frame_time;
+	last_frame_time = current_time;
 }
