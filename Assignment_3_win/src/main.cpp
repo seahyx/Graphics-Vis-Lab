@@ -3,7 +3,7 @@
 //
 //  Assignment 3 of SUTD Course 50.017
 //
-//    Texture Mapping
+//         Texture Mapping
 //
 //
 //
@@ -99,21 +99,41 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 //// TODO: fill this function to realize plane mapping
 void calcPlaneMapping(void)
 {
-
+	for (unsigned int i = 0; i < myObject.vertices.size(); i++)
+	{
+		Vertex& v = myObject.vertices[i];
+		v.t[0] = (v.v[0] - myObject.bBox.minP[0]) / myObject.bBox.vSize[0];
+		v.t[1] = (v.v[1] - myObject.bBox.minP[1]) / myObject.bBox.vSize[1];
+	}
 }
 
 
 //// TODO: fill this function to realize cylindrical mapping
 void calcCylindricalMapping(void)
 {
-
+    for (unsigned int i = 0; i < myObject.vertices.size(); i++)
+    {
+        Vertex& v = myObject.vertices[i];
+        glm::vec3 v_norm = glm::normalize(glm::vec3(v.v[0], v.v[1], v.v[2]));
+        float angle = glm::atan(v_norm[0] / v_norm[1]);
+        v.t[0] = angle / (2 * PI);
+        v.t[1] = (v.v[2] - myObject.bBox.minP[2]) / myObject.bBox.vSize[2];
+    }
 }
 
 
 //// TODO: fill this function to realize sphere mapping
 void calcSphereMapping(void)
 {
-
+    for (unsigned int i = 0; i < myObject.vertices.size(); i++)
+    {
+        Vertex& v = myObject.vertices[i];
+        glm::vec3 v_norm = glm::normalize(glm::vec3(v.v[0], v.v[1], v.v[2]));
+        float angle_long = glm::atan(v_norm[0] / v_norm[1]);
+        float angle_lat = glm::acos(v_norm[2]);
+        v.t[0] = angle_long / (2 * PI);
+        v.t[1] = angle_lat / PI;
+    }
 }
 
 
