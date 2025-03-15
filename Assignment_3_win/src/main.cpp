@@ -51,7 +51,7 @@ using namespace std;
 /***********************************************************************/
 
 // Window size
-unsigned int winWidth  = 800;
+unsigned int winWidth  = 600;
 unsigned int winHeight = 600;
 
 // Camera
@@ -96,7 +96,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 ///=========================================================================================///
 
 
-//// TODO: fill this function to realize plane mapping
+//// Plane mapping
 void calcPlaneMapping(void)
 {
 	for (unsigned int i = 0; i < myObject.vertices.size(); i++)
@@ -108,7 +108,7 @@ void calcPlaneMapping(void)
 }
 
 
-//// TODO: fill this function to realize cylindrical mapping
+//// Cylindrical mapping
 void calcCylindricalMapping(void)
 {
     for (unsigned int i = 0; i < myObject.vertices.size(); i++)
@@ -122,7 +122,7 @@ void calcCylindricalMapping(void)
 }
 
 
-//// TODO: fill this function to realize sphere mapping
+//// Sphere mapping
 void calcSphereMapping(void)
 {
     for (unsigned int i = 0; i < myObject.vertices.size(); i++)
@@ -133,6 +133,8 @@ void calcSphereMapping(void)
         float angle_lat = glm::acos(v_norm[2]);
         v.t[0] = angle_long / (2 * PI);
         v.t[1] = angle_lat / PI;
+        if (v.t[1] > 1.0f)
+            v.t[1] = 2.0f - v.t[1];
     }
 }
 
